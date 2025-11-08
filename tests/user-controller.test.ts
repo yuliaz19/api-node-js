@@ -28,7 +28,7 @@ test.describe('User management API', () => {
 
     test('create user: should add a new user', async ({ request }) => {
         const response = await request.post(`${baseURL}`);
-        expect.soft(response.status()).toBe(201);
+        expect.soft(response.status()).toBe(StatusCodes.CREATED);
         const responseBody = await response.json()
         expect.soft(responseBody.id).toBeDefined();
         expect.soft(responseBody.name).toBeDefined();
