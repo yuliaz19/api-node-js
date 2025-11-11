@@ -5,6 +5,33 @@ let baseURL: string = 'http://localhost:3000/users';
 
 test.describe('User management API', () => {
 
+    test.beforeEach('get and delete all existing users', async ({ request }) => {
+        const responseAllUsers = await request.get(`${baseURL}`);
+        const responseUsers = await responseAllUsers.json();
+        const numberOfObjects = responseUsers.length;
+        console.log('numberOfObjects', numberOfObjects);
+
+        let userIDs: number[] = [];
+        // loop through all users and store their ID in an array
+        for (let i = 0; i < numberOfObjects; i++) {
+            // get user ID from the response
+            let userID = responseUsers[i].id;
+            // push is used to add elements to the end of an array
+            userIDs.push(userID);
+        }
+        // delete all users by id
+        for (let i = 0; i < numberOfObjects; i++) {
+            let userID = responseUsers[i].id;
+            let response = await request.delete(`${baseURL}/${userIDs[i]}`);
+            expect.soft(response.status()).toBe(200);
+        }
+        //check that all users deleted
+        const response = await request.get(`${baseURL}`);
+        expect.soft(response.status()).toBe(StatusCodes.OK);
+        const responseBody = await response.text()
+        expect.soft(responseBody).toBe('[]');
+    });
+
     test('find user: should return a user by ID', async ({ request }) => {
         const response = await request.post(`${baseURL}`);
         const responseBody = await response.json()
@@ -60,4 +87,30 @@ test.describe('User management API', () => {
         expect.soft(delAgainResponse.status()).toBe(StatusCodes.NOT_FOUND);
     });
 
+    test('get userID information', async ({ request }) => {
+        const response = await request.post(`${baseURL}`);
+        const response2 = await request.post(`${baseURL}`);
+        const responseAllUsers = await request.get(`${baseURL}`);
+        const responseUsers = await responseAllUsers.json();
+        const numberOfObjects = responseUsers.length;
+        console.log('numberOfObjects', numberOfObjects);
+
+        let userIDs: number[] = [];
+        // loop through all users and store their ID in an array
+        for (let i = 0; i < numberOfObjects; i++) {
+            // get user ID from the response
+            let userID = responseUsers[i].id;
+            // push is used to add elements to the end of an array
+            userIDs.push(userID);
+        }
+        for (let i = 0; i < numberOfObjects; i++) {
+            // delete user by id
+            let response = await request.delete(`${baseURL}/${userIDs[i]}`);
+            // validate the response status code
+            expect.soft(response.status()).toBe(200);
+        }
+        console.log('userIDs', userIDs);
+    });
+
 });
+
